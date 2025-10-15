@@ -1,6 +1,7 @@
 # Artificial Intelligence as a Surrogate Brain
 
-![Paper](https://arxiv.org/abs/2510.10308-red)
+![Paper](https://img.shields.io/badge/arxiv.2510.10308-red)
+
 
 
 This repository contains the open-source implementation of the paper:  
