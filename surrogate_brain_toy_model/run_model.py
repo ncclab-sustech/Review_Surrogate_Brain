@@ -5,7 +5,7 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset, random_split
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from pathlib import Path
-from evaluate import regression_metrics
+from evaluate import regression_metrics, regression_metrics_new
 import matplotlib.pyplot as plt
 import pandas as pd
 import copy
@@ -169,8 +169,125 @@ def train_model(model, train_loader, val_loader,
     return save_path
 
 
+def train_model_new(model, train_loader, val_loader,
+                criterion, optimizer, scheduler, early_stop,
+                num_epochs, save_path, regularizers=None,
+                device='cpu', dim_z=512, tau=5, model_type='RNN'
+                ):
 
-def evaluate_model(model, test_loader, ckpt_path, tau, device, name, model_type, reg_tag="", dim_z=512):
+    best_val = float("inf")
+    best_model_state = None
+    best_optimizer_state = None
+    best_epoch = -1
+    
+    if regularizers is None:
+        regularizers = {}
+
+    history = {
+        "epoch": [],
+        "train_loss": [],
+        "val_loss": [],
+        "recon_loss": [],     
+        "lr": [],             
+    }
+    for name in regularizers.keys():
+        history[f"reg/{name}"] = []
+
+    for epoch in range(num_epochs):
+        model.train()
+        total_loss = 0.0
+        total_recon = 0.0
+        reg_sums = {name: 0.0 for name in regularizers.keys()}
+        n_samples = 0
+
+        for batch in train_loader:
+            seq = batch[0].to(device)
+            B = seq.size(0)
+            n_samples += B
+
+            optimizer.zero_grad()
+
+            x_pred, *_ = model(seq)
+
+            # Reconstruction loss: predict next step
+            recon_pred = x_pred[:, :-1, :]
+            recon_true = seq[:, 1:, :]
+            recon = criterion(recon_pred, recon_true)
+
+            loss = recon
+            # Apply optional regularizers
+            for name, (reg_fn, lam) in regularizers.items():
+                if lam:
+                    reg_val = reg_fn(model=model,
+                                     recon_pred=recon_pred,
+                                     recon_true=recon_true,
+                                     batch=batch)
+                    loss = loss + lam * reg_val
+                    reg_sums[name] += float((lam * reg_val).detach().item()) * B
+
+            # Backpropagation
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
+            optimizer.step()
+
+            total_loss  += float(loss.detach().item()) * B
+            total_recon += float(recon.detach().item()) * B
+
+        # Epoch-level metrics
+        train_loss = total_loss / n_samples
+        recon_loss = total_recon / n_samples
+        val_loss = val_loss_compute(model, val_loader, criterion, device)
+        
+
+        lr = optimizer.param_groups[0].get("lr", None)
+        
+        print(f"Epoch {epoch:03d}: train={train_loss:.6f}, val={val_loss:.6f}, lr={lr}")
+
+        history["epoch"].append(epoch)
+        history["train_loss"].append(train_loss)
+        history["val_loss"].append(val_loss)
+        history["recon_loss"].append(recon_loss)
+        history["lr"].append(lr)
+        for name in regularizers.keys():
+            history[f"reg/{name}"].append(reg_sums[name] / n_samples if n_samples > 0 else 0.0)
+
+        # Scheduler / Early stopping
+        scheduler.step(val_loss)
+        early_stop.step(val_loss)
+
+        # Save best
+        if val_loss < best_val:
+            best_val = val_loss
+            best_epoch = epoch
+            best_model_state = copy.deepcopy(model.state_dict())
+            best_optimizer_state = copy.deepcopy(optimizer.state_dict())
+
+        if early_stop.should_stop:
+            print("Early stopping.")
+            break
+
+    if best_model_state is not None:
+        torch.save({
+            'epoch': best_epoch,
+            'model_state_dict': best_model_state,
+            'optimizer_state_dict': best_optimizer_state,
+            'val_loss': best_val,
+            'regularizers': list(regularizers.keys()),
+            'dim_z': dim_z,
+            'tau': tau,
+            'model_type': model_type,
+            'history': history,             
+        }, save_path)
+        print(f"Best model saved at epoch {best_epoch}: {save_path}")
+    else:
+        print("Warning: No improvement during training, model not saved.")
+
+    return save_path, history
+
+
+
+
+def evaluate_model(model, test_loader, ckpt_path, tau, device, model_type, reg_tag="", dim_z=512, metrics=["MSE","MAE","EV","R2"]):
     """
     Evaluate a trained model on the test set, save metrics, predictions, and plots.
 
@@ -218,13 +335,14 @@ def evaluate_model(model, test_loader, ckpt_path, tau, device, name, model_type,
             yp = x_pred.permute(2, 0, 1).reshape(x_pred.shape[2], -1).cpu().numpy()
 
             # Compute regression metrics
-            df = regression_metrics(yt, yp)
+            # df = regression_metrics(yt, yp)
+            df = regression_metrics_new(yt, yp, metrics)
             mean_row = df.loc['mean'].to_dict()
 
             # Add metadata for this epoch
             mean_row['epoch'] = epoch_idx
-            mean_row['fc_sim'] = df.attrs.get('fc_sim', np.nan)
-            mean_row['h1_wass_dist'] = df.attrs.get('h1_wass_dist', np.nan)
+            # mean_row['fc_sim'] = df.attrs.get('fc_sim', np.nan)
+            # mean_row['h1_wass_dist'] = df.attrs.get('h1_wass_dist', np.nan)
             summary_rows.append(mean_row)
 
             # Collect predictions and ground truth
@@ -265,6 +383,7 @@ def evaluate_model(model, test_loader, ckpt_path, tau, device, name, model_type,
     plt.tight_layout()
     plt.savefig(png_path, dpi=300, bbox_inches='tight')
     plt.show()
+    return summary_df
 
 
 # ── Weight Regularizers ────────────────────────────────────────────────

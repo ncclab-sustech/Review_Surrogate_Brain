@@ -1,10 +1,3 @@
-"""
-run_training.py  (Python ≥3.8, PyTorch ≥2.0)
-
-Example usage:
-    python run_training.py --patients 123 060 --device 6 --epochs 500
-"""
-
 import argparse, functools, random, datetime
 import numpy as np
 from pathlib import Path
@@ -58,7 +51,7 @@ def main(args):
                 weight = float(weight)
                 reg_config[name] = weight
             except ValueError:
-                print(f"⚠️ Ignored invalid weight: {reg_spec}")
+                print(f" Ignored invalid weight: {reg_spec}")
         else:
             reg_config[reg_spec] = 1.0  # Default weight = 1.0
 
@@ -66,10 +59,12 @@ def main(args):
     for patient in args.patients:
         # Load training and testing datasets
         train_data = np.load(
-            f'./dataset/HUP{patient}_ictal_train_freq_200.npy'
+            # f'./dataset/HUP{patient}_ictal_train_freq_200.npy'
+            './demo_data/train_data.npy'
         )
         test_data  = np.load(
-            f'./dataset/HUP{patient}_ictal_test_freq_200.npy'
+            # f'./dataset/HUP{patient}_ictal_test_freq_200.npy'
+            f'./demo_data/test_data.npy'
         )
 
         # Build DataLoaders for training/validation/testing
@@ -125,7 +120,7 @@ def main(args):
 
                     # ── Training ─────────────────────────────────────
                     if args.run_train:
-                        train_model(
+                        _, history = train_model_new(
                             model=model,
                             train_loader=train_loader,
                             val_loader=val_loader,
@@ -145,16 +140,15 @@ def main(args):
                     # ── Evaluation (reload best checkpoint) ─────────
                     reg_tag = "-".join([k for k, (_, lam) in regularizers.items() if lam > 0])
                     if args.run_eval:
-                        eval_df = evaluate_model(
+                        eval_df = evaluate_model_new(
                             model, test_loader, save_path,
                             tau=tau,
                             device=device,
-                            name=patient,
                             model_type=model_type,
                             reg_tag=reg_tag,
-                            dim_z=dim_z
+                            dim_z=dim_z,
+                            metrics=args.metrics
                         )
-
 
 
 # ───────────────────────── Command Line Interface ─────────────────────────
@@ -183,6 +177,8 @@ if __name__ == "__main__":
     parser.add_argument("--run_train", action="store_true")
     parser.add_argument("--run_eval",  action="store_true")
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument('--metrics', nargs="+", default=["MSE","MAE","EV","R2","spec_sim","KL","Hellinger","FC_SIM"]) #  optional: H1_WASSERSTEIN , corr_dim (computing for long time)
+     
 
     args = parser.parse_args()
 

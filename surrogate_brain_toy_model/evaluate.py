@@ -160,3 +160,110 @@ def regression_metrics(y_true, y_pred):
     df.attrs['fc_sim'] = fc_sim
     df.attrs['h1_wass_dist'] = topo_dist
     return df
+
+
+
+def regression_metrics(y_true, y_pred, m):
+    """
+    Evaluate regression performance and additional dynamical system metrics.
+
+    Args:
+        y_true, y_pred: arrays of shape (n_channels, T)
+
+    Returns:
+        DataFrame with regression and similarity metrics per channel,
+        and additional attributes for topological and connectivity similarity.
+    """
+    dgm_true = ripser(y_true.T, maxdim=1)['dgms'][1]
+    dgm_pred = ripser(y_pred.T, maxdim=1)['dgms'][1]
+
+    fd_true, fd_pred, fd_sim = compare_correlation_dimensions(y_true.T, y_pred.T)
+    kl = calculate_kl_divergence_multi_channel(y_true.T, y_pred.T)
+    hell = calculate_hellinger_distance_multi_channel(y_true.T, y_pred.T)
+    fc_sim = functional_connectivity_similarity(y_true.T, y_pred.T)
+    topo_dist = wasserstein(dgm_true, dgm_pred)
+
+    rows = []
+    for ch in range(y_true.shape[0]):
+        yt, yp = y_true[ch, :], y_pred[ch, :]
+        rows.append(dict(
+            ch = ch,
+            MSE = mean_squared_error(yt, yp),
+            MAE = mean_absolute_error(yt, yp),
+            EV  = explained_variance_score(yt, yp),
+            R2  = r2_score(yt, yp),
+            spec_sim = compare_spectrum(yt, yp),
+            corr_sim = fd_sim,
+            KL = kl[ch],
+            hellinger = hell[ch]
+        ))
+    df = pd.DataFrame(rows).set_index('ch')
+    df.loc['mean'] = df.mean()
+    df.attrs['fc_sim'] = fc_sim
+    df.attrs['h1_wass_dist'] = topo_dist
+    return df
+
+
+
+def regression_metrics_new(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    metrics=['MSE'],
+):
+
+    n_channels, _ = y_true.shape
+    metric_list = list(metrics)
+
+    need_corr_dim = "corr_dim" in metric_list
+    need_KL       = "KL" in metric_list
+    need_H        = "Hellinger" in metric_list
+    need_spec     = "spec_sim" in metric_list
+    need_fc       = "FC_SIM" in metric_list
+    need_h1w      = "H1_WASSERSTEIN" in metric_list
+
+    results = {}
+
+
+    if "MSE" in metric_list:
+        mse_ch = ((y_true - y_pred) ** 2).mean(axis=1)
+        results["MSE"] = float(mse_ch.mean())
+
+    if "MAE" in metric_list:
+        mae_ch = (np.abs(y_true - y_pred)).mean(axis=1)
+        results["MAE"] = float(mae_ch.mean())
+
+    if "EV" in metric_list:
+        ev_ch = [explained_variance_score(y_true[i], y_pred[i]) for i in range(n_channels)]
+        results["EV"] = float(np.mean(ev_ch))
+
+    if "R2" in metric_list:
+        r2_ch = [r2_score(y_true[i], y_pred[i]) for i in range(n_channels)]
+        results["R2"] = float(np.mean(r2_ch))
+
+    if need_spec:
+        spec_ch = [float(compare_spectrum(y_true[i], y_pred[i])) for i in range(n_channels)]
+        results["spec_sim"] = float(np.mean(spec_ch))
+
+    if need_corr_dim:
+        _, _, fd_sim_scalar = compare_correlation_dimensions(y_true.T, y_pred.T)
+        results["corr_dim"] = float(fd_sim_scalar)
+
+    if need_KL:
+        kl_vec = calculate_kl_divergence_multi_channel(y_true.T, y_pred.T)  # (n_channels,)
+        results["KL"] = float(np.mean(kl_vec))
+
+    if need_H:
+        hell_vec = calculate_hellinger_distance_multi_channel(y_true.T, y_pred.T)  # (n_channels,)
+        results["Hellinger"] = float(np.mean(hell_vec))
+
+    if need_fc:
+        fc_sim_val = functional_connectivity_similarity(y_true.T, y_pred.T)
+        results["FC_SIM"] = float(fc_sim_val)
+
+    if need_h1w:
+        dgm_true = ripser(y_true.T, maxdim=1)["dgms"][1]
+        dgm_pred = ripser(y_pred.T, maxdim=1)["dgms"][1]
+        results["H1_WASSERSTEIN"] = float(wasserstein(dgm_true, dgm_pred))
+
+    df = pd.DataFrame([results], index=["mean"])
+    return df

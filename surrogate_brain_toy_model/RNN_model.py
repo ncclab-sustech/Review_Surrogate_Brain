@@ -809,20 +809,22 @@ class PLRNN_Basis_Step(nn.Module):
         return nn.Parameter(tensor)
 
     def _init_AW(self) -> nn.Parameter:
-        """
-        Initialize AW as identity + positive-definite perturbation,
-        normalized so its spectral radius is 1.
-        """
+        '''
+        Talathi & Vartak 2016: Improving Performance of Recurrent Neural Network
+        with ReLU Nonlinearity https://arxiv.org/abs/1511.03771.
+        '''
         rand = torch.randn(self.dz, self.dz)
         positive_def = (1 / self.dz) * rand.T @ rand
         mat = torch.eye(self.dz) + positive_def
         max_ev = torch.linalg.eigvals(mat).abs().max()
-        return nn.Parameter(mat / max_ev)
+        matrix_spectral_norm_one = mat / max_ev
+        return nn.Parameter(matrix_spectral_norm_one, requires_grad=True) #nn.Parameter(mat / max_ev)
 
     def _init_thetas_uniform(self, dataset) -> nn.Parameter:
-        """
-        Initialize basis centers (thetas) from the data range.
-        """
+        '''
+        Initialize theta matrix of the basis expansion models such that 
+        basis thresholds are uniformly covering the range of the given dataset
+        '''
         mn, mx = dataset.data.min().item(), dataset.data.max().item()
         theta = torch.empty((self.dz, self.db))
         nn.init.uniform_(theta, -mx, -mn)

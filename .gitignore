@@ -1,1 +1,5 @@
 surrogate_brain_toy_model/dataset/
+surrogate_brain_toy_model/results/
+surrogate_brain_toy_model/__pycache__/
+*.pyc
+*.pyo
