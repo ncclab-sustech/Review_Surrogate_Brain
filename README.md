@@ -2,7 +2,7 @@
 
 
 This repository contains the open-source implementation of the paper:  
-**_Artificial Intelligence as a Surrogate Brain: Bridging Neural Dynamical Models and Data_**.[Paper](https://img.shields.io/badge/arxiv.2510.10308-red)
+**_Artificial Intelligence as a Surrogate Brain: Bridging Neural Dynamical Models and Data_**.![Paper](https://img.shields.io/badge/arxiv.2510.10308-red)
 
 ![Framework Diagram](Figures/framework.png)
 
