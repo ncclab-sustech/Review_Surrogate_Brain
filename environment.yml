@@ -1,0 +1,16 @@
+name: surrogate_brain
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - mne-bids
+  - pandas
+  - mne
+  - numpy
+  - matplotlib
+  - pytorch
+  - scipy
+  - openpyxl
+  - ripser
+prefix: /home/unonou/miniconda3/envs/surrogate_brain
