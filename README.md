@@ -1,14 +1,8 @@
 # Artificial Intelligence as a Surrogate Brain
 
 
-<p align="center">
-  <a href="https://arxiv.org/abs/2510.10308">
-    <img src="https://img.shields.io/badge/arxiv.2510.10308-red" alt="arXiv Paper Link"/>
-  </a>
-</p>
-
 This repository contains the open-source implementation of the paper:  
-**_Artificial Intelligence as a Surrogate Brain: Bridging Neural Dynamical Models and Data_**.
+**_Artificial Intelligence as a Surrogate Brain: Bridging Neural Dynamical Models and Data_**.[Paper](https://img.shields.io/badge/arxiv.2510.10308-red)
 
 ![Framework Diagram](Figures/framework.png)
 
