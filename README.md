@@ -53,7 +53,7 @@ To run the full training process, execute the following command:
 
 `cd surrogate_brain_toy_model`
 
-`python run_main.py --gpu cuda:0`
+`python run_main.py`
 
 ### Model Options
 You can choose from the following models for training:
