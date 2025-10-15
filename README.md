@@ -93,11 +93,13 @@ We also provide visualization code for the Example of Ill-posedness (Figure 3) a
 ### Example of Ill-posedness (Figure 3)
 
 ![Eaxmple of ill-posedness](Figures/figure_3.png)
-*Caption: Example of non-uniqueness and instability.*
+
+*Example of non-uniqueness and instability.*
 
 ### Evaluation of Surrogate Brain (Figure 4)
 ![Evaluation of surrogate brain](Figures/figure_4.png)
-*Caption: Model evaluation from mathematical and neuroscientific perspectives.*
+
+*Model evaluation from mathematical and neuroscientific perspectives.*
 
 ---
 ## Citations
