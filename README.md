@@ -11,7 +11,7 @@ This repository contains the open-source implementation of the paper:
 ## Updates
 
 - **2025/10/14**: Paper published on [arXiv](https://arxiv.org/abs/2510.10308)
-- **2025/10/10**: Paper accepted by *National Science Review*
+- **2025/10/10**: Paper accepted by **National Science Review**
 - **2025/08/21**: Code released
 
 ---
