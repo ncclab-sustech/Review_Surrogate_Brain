@@ -2,7 +2,7 @@
 
 
 This repository contains the open-source implementation of the paper:  
-**_Artificial Intelligence as a Surrogate Brain: Bridging Neural Dynamical Models and Data_**.![Paper](https://img.shields.io/badge/arxiv.2510.10308-red)
+**_Artificial Intelligence as a Surrogate Brain: Bridging Neural Dynamical Models and Data_**![Paper](https://img.shields.io/badge/arxiv.2510.10308-red).
 
 ![Framework Diagram](Figures/framework.png)
 
@@ -67,23 +67,23 @@ You can choose from the following models for training:
 ### Evaluation Metrics
 The model is evaluated from 5 different angles, using 10 different metrics:
 
-1. **Error metrics in state space**:  
+*Error metrics in state space*:  
    - Mean Squared Error (MSE)  
    - Mean Absolute Error (MAE)
 
-2. **Metrics in probability space**:  
+*Metrics in probability space*:  
    - Kullback-Leibler Divergence (KL Divergence)  
    - Hellinger Distance
 
-3. **Goodness of fit**:  
+*Goodness of fit*:  
    - Explained Variance (EV)  
    - R-squared (R²)
 
-4. **Functional similarity**:  
+*Functional similarity*:  
    - Spectral Similarity  
    - Functional Connectivity Similarity
 
-5. **Topological similarity**:  
+*Topological similarity*:  
    - Persistent Homology Wasserstein Distance  
    - Fractal Dimension Similarity
 
