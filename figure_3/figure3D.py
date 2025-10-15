@@ -2,16 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.style as style
 
-# Load matrix and vector data from files
 matrix_1 = np.load(f'figure_3_data\ZZ_{0}_({42})_matrix{19}.npy')
 vector_1 = np.load(f'figure_3_data\ZZ_{0}_({42})_vector{19}.npy')
 matrix_2 = np.load(f'figure_3_data\ZZ_sanjiao_0_({42})_matrix{19}.npy')
 vector_2 = np.load(f'figure_3_data\ZZ_sanjiao_0_({42})_vector{19}.npy')
 
-# Set plot style for better aesthetics
 style.use('default')
 
-# Perform Singular Value Decomposition (SVD)
 U, sing_vals_1, Vh = np.linalg.svd(matrix_1)
 U2, sing_vals_2, Vh2 = np.linalg.svd(matrix_2)
 
@@ -199,14 +196,9 @@ for flier in boxplot2['fliers']:
     flier.set_markeredgewidth(0.5)
     flier.set_markeredgecolor('salmon')
 
-# ------------------- 7. Labels and title -------------------
 ax.set_xlabel('Disturbance intensity', fontsize=14)
 ax.set_ylabel('Relative variation', fontsize=14)
 ax.spines['right'].set_color('none')
 ax.spines['top'].set_color('none')
-# ax.set_title('c', fontsize=16, fontweight='bold')
-
-# Optional grid
-# ax.grid(True, which='both', linestyle='--', alpha=0.5)
 
 plt.show()

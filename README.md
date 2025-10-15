@@ -55,6 +55,7 @@ To run the full training process, execute the following command:
 
 `python run_main.py`
 
+
 ### Model Options
 You can choose from the following models for training:
 - RNN
@@ -84,6 +85,19 @@ The model is evaluated from 5 different angles, using 10 different metrics:
 5. **Topological similarity**:  
    - Persistent Homology Wasserstein Distance  
    - Fractal Dimension Similarity
+
+## More 
+
+We also provide visualization code for the Example of Ill-posedness (Figure 3) and Evaluation of Surrogate Brain (Figure 4) from the paper. Please refer to the `/figure_3` and `/figure_4` folders for the corresponding code.
+
+### Example of Ill-posedness (Figure 3)
+
+![Eaxmple of ill-posedness](Figures/figure_3.png)
+*Caption: Example of non-uniqueness and instability.*
+
+### Evaluation of Surrogate Brain (Figure 4)
+![Evaluation of surrogate brain](Figures/figure_4.png)
+*Caption: Model evaluation from mathematical and neuroscientific perspectives.*
 
 ---
 ## Citations
