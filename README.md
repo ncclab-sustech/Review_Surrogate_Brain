@@ -92,12 +92,12 @@ The model is evaluated from 5 different angles, using 10 different metrics:
 We also provide visualization code for the Example of Ill-posedness (Figure 3) and Evaluation of Surrogate Brain (Figure 4) from the paper. Please refer to the `/figure_3` and `/figure_4` folders for the corresponding code.
 
 ### Example of Ill-posedness (Figure 3).
-### Example of non-uniqueness and instability.
+#### Example of non-uniqueness and instability.
 
 ![Eaxmple of ill-posedness](Figures/figure_3.png)
 
 ### Evaluation of Surrogate Brain (Figure 4)
-### Model evaluation from mathematical and neuroscientific perspectives.
+#### Model evaluation from mathematical and neuroscientific perspectives.
 ![Evaluation of surrogate brain](Figures/figure_4.png)
 
 ---
